@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="popup.css" />
+  <title>Cookie Export Settings</title>
+</head>
+<body>
+  <h2>Cookie Exporter</h2>
+
+  <div class="section">
+    <label>Export Interval:</label>
+    <select id="interval">
+      <option value="day">Every Day</option>
+      <option value="week">Every Week</option>
+      <option value="month">Every Month</option>
+      <option value="custom">Custom</option>
+      <option value="off">Off</option>
+    </select>
+    <div id="customIntervalContainer" style="display:none;">
+      <input type="number" id="customDays" min="1" placeholder="Days" /> days
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Sites to Export:</label>
+    <textarea id="sites" placeholder="example.com, another.com"></textarea>
+  </div>
+
+  <div class="section">
+    <label>Export Location:</label>
+    <input type="text" id="location" placeholder="e.g. /Downloads/cookie_backups" />
+  </div>
+
+  <div class="section">
+    <label><input type="checkbox" id="encrypt"> Encrypt with Password</label>
+    <div id="passwordContainer" style="display:none;">
+      <input type="password" id="password" placeholder="Enter encryption password" />
+    </div>
+  </div>
+
+  <div class="section">
+    <p>Last Backup: <span id="lastBackup">—</span></p>
+    <p>Next Backup: <span id="nextBackup">—</span></p>
+  </div>
+
+  <button id="saveBtn">Save Settings</button>
+  <button id="saveCurrentBtn" class="secondary-btn">Export Current Site Now</button>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

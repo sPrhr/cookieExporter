@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Cookie Export Scheduler",
+  "version": "1.0",
+  "description": "Export cookies automatically at scheduled intervals.",
+  "permissions": [
+    "cookies",
+    "storage",
+    "alarms",
+    "downloads",
+    "tabs",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "48": "icons/icon48.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "cookieexporter@example.com",
+      "strict_min_version": "109.0"
+    }
+  }
+}
