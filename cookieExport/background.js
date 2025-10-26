@@ -4,11 +4,16 @@ import { notify } from "../utils/notify.js";
 
 const browserApi = typeof chrome !== "undefined" ? chrome : browser;
 
-browserApi.runtime.onMessage.addListener((msg) => {
+browserApi.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "updateSchedule") {
     setupSchedule();
   } else if (msg.type === "instantExport" && msg.domain) {
-    runCookieExport({ instantDomain: msg.domain });
+    runCookieExport({ 
+      sites: msg.sites,
+      isInstant: true,
+      password: msg.password,
+      encrypt: msg.encrypt
+     });
     return true;
   }
 });
@@ -59,18 +64,29 @@ async function handleAlarm(alarm) {
 // ─────────────────────────────────────────────
 async function runCookieExport(config = {}) {
   try {
-    const isInstant = !!config.instantDomain;
+    const isInstant = config.isInstant || false;
+    let settings = {};
 
-    const settings = isInstant ? { encrypt: false, password: "" } : await browserApi.storage.local.get([
+    if (!isInstant) {
+      settings = await browserApi.storage.local.get([
         "sites", "location", "encrypt", "password", "interval", "customDays",
       ]);
+    }
 
-    const sitesToExport = isInstant ? [config.isInstant] : (settings.sites ? settings.sites.split(",") : []);
-
+    let sitesToExport;
+    if (isInstant) {
+      sitesToExport = config.sites;
+    } else {
+      sitesToExport = (settings.sites || "").split(",").map(s => s.trim()).filter(s => s.length > 0);
+    }
+    
     if (sitesToExport.length === 0) {
-      await notify("Export skipped", "No sites configured for export.");
+      await notify("No Sites Specified", "Please add sites to export in the extension settings.");
       return;
     }
+
+    const encrypt = isInstant ? config.encrypt : (settings.encrypt || false);
+    const password = isInstant ? config.password : (settings.password || "");
 
     const cookies = await exportCookies(sitesToExport);
     let data = JSON.stringify(cookies, null, 2);
@@ -82,17 +98,15 @@ async function runCookieExport(config = {}) {
     const blob = new Blob([data], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const dateStamp = new Date().toISOString().split("T")[0];
-    const locationPath = isInstant ? "" : (settings.location || "").trim().replace(/^\/|\/$/g, '');
-    const encrypt = settings.encrypt;
-    const password = settings.password;
+    const locationPath = (settings.location || "").trim().replace(/^\/|\/$/g, '');
     const filename = `${locationPath}${locationPath ? '/' : ''}cookies_${domainPart}_${dateStamp}.json`;
-    const domainPart = isInstant ? config.instantDomain.replace(/\./g, '_') : 'backup';
+    const domainPart = isInstant ? sitesToExport.length === 1 ? sitesToExport[0].replace(/\./g, '_') : 'instant_export' : 'backup';
 
 
     await browserApi.downloads.download({
       url,
       filename: filename,
-      saveAs: true,
+      saveAs: isInstant,
     });
 
     URL.revokeObjectURL(url);
@@ -103,7 +117,7 @@ async function runCookieExport(config = {}) {
       await browserApi.storage.local.set({ lastBackup, nextBackup });
     }
 
-    const exportTarget = isInstant ? config.instantDomain : locationPath;
+    const exportTarget = isInstant ? sitesToExport.join(', ') : locationPath;
     await notify("Backup Complete", `Cookies exported successfully to ${exportTarget}`);
   } catch (err) {
     console.error("runCookieExport Failed:", err);
@@ -118,6 +132,17 @@ async function runCookieExport(config = {}) {
 // Cookie exporter helper
 // ─────────────────────────────────────────────
 async function exportCookies(sites) {
+  if (sites.includes('<all>')) {
+    const allCookies = await browserApi.cookies.getAll({});
+    const grouped = allCookies.reduce((acc, cookie) => {
+      const domain = cookie.domain;
+      if (!acc[domain]) acc[domain] = { domain, cookie: [] };
+      acc[domain].cookie.push(cookie);
+      return acc;
+    }, {});
+    return Object.values(grouped);
+  }
+
   const allCookies = [];
   for (const site of sites) {
     const domain = site.trim();

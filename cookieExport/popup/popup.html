@@ -8,44 +8,77 @@
 <body>
   <h2>Cookie Exporter</h2>
 
-  <div class="section">
-    <label>Export Interval:</label>
-    <select id="interval">
-      <option value="day">Every Day</option>
-      <option value="week">Every Week</option>
-      <option value="month">Every Month</option>
-      <option value="custom">Custom</option>
-      <option value="off">Off</option>
-    </select>
-    <div id="customIntervalContainer" style="display:none;">
-      <input type="number" id="customDays" min="1" placeholder="Days" /> days
+  <div id="page-1" class="page">
+    <p><strong>Save Location:</strong> <span id="displayLocation">—</span></p>
+    <p><strong>Sites:</strong> <span id="displaySites">—</span></p>
+    <p><strong>Encryption:</strong> <span id="displayEncrypt">—</span></p>
+    <div class="section">
+      <p>Last Backup: <span id="lastBackup">—</span></p>
+      <p>Next Backup: <span id="nextBackup">—</span></p>
     </div>
+    
+    <button id="goToPage3Btn">Export Current Site Now</button>
+    <button id="goToPage2Btn" class="icon-btn">⚙️ Settings</button> 
   </div>
 
-  <div class="section">
-    <label>Sites to Export:</label>
-    <textarea id="sites" placeholder="example.com, another.com"></textarea>
-  </div>
-
-  <div class="section">
-    <label>Export Location:</label>
-    <input type="text" id="location" placeholder="e.g. /Downloads/cookie_backups" />
-  </div>
-
-  <div class="section">
-    <label><input type="checkbox" id="encrypt"> Encrypt with Password</label>
-    <div id="passwordContainer" style="display:none;">
-      <input type="password" id="password" placeholder="Enter encryption password" />
+  <div id="page-2" class="page" style="display:none;">
+    <div class="section">
+      <label>Export Interval:</label>
+      <select id="interval">
+        <option value="day">Every Day</option>
+        <option value="week">Every Week</option>
+        <option value="month">Every Month</option>
+        <option value="custom">Custom</option>
+        <option value="off">Off</option>
+      </select>
+      <div id="customIntervalContainer" style="display:none;">
+        <input type="number" id="customDays" min="1" placeholder="Days" /> days
+      </div>
     </div>
+
+    <div class="section">
+      <label>Sites to Export (Comma-separated):</label>
+      <textarea id="sites" placeholder="example.com, another.com"></textarea>
+    </div>
+
+    <div class="section">
+      <label>Export Location:</label>
+      <input type="text" id="location" placeholder="e.g. /Downloads/cookie_backups" />
+    </div>
+
+    <div class="section">
+      <label><input type="checkbox" id="encrypt"> Encrypt with Password</label>
+      <div id="passwordContainer" style="display:none;">
+        <input type="password" id="password" placeholder="Enter encryption password" />
+      </div>
+    </div>
+    
+    <button id="saveBtn">Save Settings</button>
+    <button id="backToPage1Btn">← Back</button>
+  </div>
+  
+  <div id="page-3" class="page" style="display:none;">
+    <h3>Instant Export</h3>
+    <p>Target Site: <strong id="instantExportDomain">loading...</strong></p>
+
+    <div class="section">
+      <label>Export Scope:</label>
+      <select id="exportScope">
+        <option value="current">Current Site Only</option>
+        <option value="listed">Listed Sites (from settings)</option>
+        <option value="all">All Cookies</option>
+      </select>
+    </div>
+
+    <div class="section" id="instantPasswordContainer" style="display:none;">
+        <label>Password (for encryption):</label>
+        <input type="password" id="instantPassword" placeholder="Enter password" />
+    </div>
+    
+    <button id="startInstantExportBtn">Export Now</button>
+    <button id="backFromPage3Btn">← Back</button>
   </div>
 
-  <div class="section">
-    <p>Last Backup: <span id="lastBackup">—</span></p>
-    <p>Next Backup: <span id="nextBackup">—</span></p>
-  </div>
-
-  <button id="saveBtn">Save Settings</button>
-  <button id="saveCurrentBtn" class="secondary-btn">Export Current Site Now</button>
 
   <script src="popup.js" type="module"></script>
 </body>
